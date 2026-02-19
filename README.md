@@ -5,7 +5,7 @@ A shell script that automates the setup of a **Student Attendance Tracker** proj
 ## Prerequisites
 A Unix-based system (Linux or macOS)
 'bash' shell
-'python3' (optional — the script will warn you if it is not found)
+'python3' (optional the script will warn you if it is not found)
 
 ## How to Run
 1. **Clone the repository:**
