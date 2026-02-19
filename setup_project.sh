@@ -1,6 +1,4 @@
-#!/bin/bash
-
-# setup_project.sh
+#!/usr/bin/env bash
 # Automated bootstrapping script for Student Attendance Tracker
 # Handles directory creation, file generation, config updates, signal trapping, and health checks
 
@@ -16,9 +14,9 @@ cleanup() {
     if [ -d "$PROJECT_NAME" ]; then
         tar -czf "${PROJECT_NAME}_archive.tar.gz" "$PROJECT_NAME" 2>/dev/null || echo "[Warning] Archive creation failed (possibly empty directory)"
         rm -rf "$PROJECT_NAME"
-        echo "[Cleanup] Incomplete project removed. Archive saved as ${PROJECT_NAME}_archive.tar.gz"
+        echo "Incomplete project removed. Archive saved as ${PROJECT_NAME}_archive.tar.gz"
     else
-        echo "[Cleanup] No directory to clean up."
+        echo "No directory to clean up."
     fi
     
     exit 1
@@ -120,8 +118,6 @@ def run_attendance_check():
             if attendance_pct < config['thresholds']['failure']:
                 message = f"URGENT: {name}, your attendance is {attendance_pct:.1f}%. You will fail this class."
             elif attendance_pct < config['thresholds']['warning']:
-                message = f"WARNING: {name}, your attendance is {attendance_pct:.1f}%. Please be careful."
-
             if message:
                 if config['run_mode'] == "live":
                     log.write(f"[{datetime.now()}] ALERT SENT TO {email}: {message}\n")
@@ -138,8 +134,15 @@ chmod +x attendance_checker.py
 echo "Core files generated."
 
 # Prompt user about updating thresholds
-echo
-read -p "Do you want to update the attendance thresholds? (y/N): " UPDATE
+while true; do
+    read -p "Do you want to update the attendance thresholds? (y/n): " UPDATE
+    if [[ "$UPDATE" =~ ^[YyNn]$ ]]; then
+        break
+    else
+        echo "Invalid input. Please enter y or n."
+    fi
+done
+
 if [[ "$UPDATE" =~ ^[Yy]$ ]]; then
     while true; do
         read -p "Enter warning threshold in % (0-100, default 75): " NEW_WARNING
@@ -185,19 +188,14 @@ echo
 echo "Verifying directory structure..."
 missing=0
 
-[ -f attendance_checker.py ]       && echo "✓ attendance_checker.py"      || { echo "✗ attendance_checker.py missing"; missing=1; }
-[ -d Helpers ]                      && echo "✓ Helpers/ directory"        || { echo "✗ Helpers/ missing"; missing=1; }
-[ -f Helpers/assets.csv ]           && echo "✓ Helpers/assets.csv"        || { echo "✗ Helpers/assets.csv missing"; missing=1; }
-[ -f Helpers/config.json ]          && echo "✓ Helpers/config.json"       || { echo "✗ Helpers/config.json missing"; missing=1; }
-[ -d reports ]                      && echo "✓ reports/ directory"        || { echo "✗ reports/ missing"; missing=1; }
-[ -f reports/reports.log ]          && echo "✓ reports/reports.log"       || { echo "✗ reports/reports.log missing"; missing=1; }
+[ -f attendance_checker.py ]  || { echo "✗ attendance_checker.py missing"; missing=1; }
+[ -d Helpers ]                || { echo "✗ Helpers/ missing"; missing=1; }
+[ -f Helpers/assets.csv ]     || { echo "✗ Helpers/assets.csv missing"; missing=1; }
+[ -f Helpers/config.json ]    || { echo "✗ Helpers/config.json missing"; missing=1; }
+[ -d reports ]                || { echo "✗ reports/ missing"; missing=1; }
+[ -f reports/reports.log ]    || { echo "✗ reports/reports.log missing"; missing=1; }
 
 if [ $missing -eq 0 ]; then
     echo
     echo "All checks passed! Project setup complete."
     echo "Directory: $PROJECT_DIR"
-    echo "To run: cd $PROJECT_NAME && python3 attendance_checker.py"
-else
-    echo "Some files are missing. Setup incomplete."
-fi
-
