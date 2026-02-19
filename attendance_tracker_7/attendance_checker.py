@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import csv
 import json
 import os
@@ -43,4 +44,3 @@ def run_attendance_check():
 
 if __name__ == "__main__":
     run_attendance_check()
-
